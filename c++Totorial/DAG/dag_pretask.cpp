@@ -82,62 +82,56 @@ private:
     std::unordered_map<std::string, module*> _modules;
 };
 
-class exe_kahn
+class executor_kahn
 {
-
-private:
-    std::unordered_map<std::string, module*> _modules;
-};
-
-class DFSDAGScheduler
-{
-
-    void dfs(int node) {
-        if (visited[node] == 1) 
-            throw runtime_error("检测到循环依赖！");
-        if (visited[node] == 2) 
-            return;
-
-        visited[node] = 1;  // 标记为"正在访问"
-        for (int neighbor : adj[node]) {
-            dfs(neighbor);
-        }
-        visited[node] = 2;  // 标记为"已完成"
-        result.push_back(node);
-    }
-
 public:
-    DFSDAGScheduler(int n) : adj(n), visited(n, 0) {}
-
-    void addEdge(int from, int to) {
-        adj[from].push_back(to);
-    }
-    void addEdge(module* target, module* depend)
+    void add_module(module* mod)
     {
-
+        _modules[mod->GetName()] = mod;
     }
-
-    vector<int> schedule() {
-        result.clear();
-        fill(visited.begin(), visited.end(), 0);
-
-        for (int i = 0; i < adj.size(); ++i) {
-            if (visited[i] == 0) {
-                dfs(i);
+    void execute_all()
+    {
+        unordered_map<string, vector<module*> > dep_modules;
+        // 初始化入度和依赖模块
+        for (auto& mod_pair : _modules)
+        {
+            const string& mod_name = mod_pair.first;
+            const vector<string>& mod_deps = mod_pair.second->GetDeps();
+            _indegree[mod_name] = mod_deps.size();
+            for (const string& dep_name : mod_deps)
+            {
+                dep_modules[dep_name].push_back(mod_pair.second);
+                cout << dep_name << "->" << mod_pair.second->GetName() << endl;
+            }
+        }
+        // 将入度为0的模块加入队列
+        queue<module*> que;
+        for (auto& mod_pair : _modules)
+        {
+            if (_indegree[mod_pair.first] == 0) {
+                que.push(mod_pair.second);
             }
         }
 
-        reverse(result.begin(), result.end());
-        return result;
+        // 按照队列中的顺序执行模块
+        while (!que.empty()) {
+            module* mod = que.front();
+            que.pop();
+            mod->execute();
+            for (module* dep_mod : dep_modules[mod->GetName()])
+            {
+                if (--_indegree[dep_mod->GetName()] == 0) {
+                    que.push(dep_mod);
+                }
+            }
+        }
     }
 private:
+    unordered_map<string, int> _indegree;
     unordered_map<string, module*> _modules;
-    vector<vector<int> > adj;   // 邻接表
-    vector<int> visited;        // 0=未访问, 1=访问中, 2=完成
-    vector<int> result;         // 逆序存储结果
 };
 
-int main()
+void test1()
 {
     // 创建moduleA和moduleB对象，并指定它们的依赖关系
     // 举例:A2依赖A1
@@ -156,5 +150,29 @@ int main()
     // 执行所有modules的操作
     e.execute_all();
 
+}
+void test2()
+{
+    // 创建moduleA和moduleB对象，并指定它们的依赖关系
+    // 举例:A2依赖A1
+    moduleA mA1("A1", {});
+    moduleA mA2("A2", {"A1"});
+    moduleA mA3("A3", {"B1"});
+    moduleB mB1("B1", {"A1", "A2"});
+
+    // 创建executor对象，并添加moduleA和moduleB对象
+    executor_kahn e;
+    e.add_module(&mA1);
+    e.add_module(&mA2);
+    e.add_module(&mB1);
+    e.add_module(&mA3);
+
+    // 执行所有modules的操作
+    e.execute_all();
+}
+
+int main()
+{
+    test2();
     return 0;
 }

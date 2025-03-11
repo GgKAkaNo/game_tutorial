@@ -158,7 +158,7 @@ void lock() {
 
 - **引入互斥锁来保护输出操作**：在输出时，加一个互斥锁，确保同一时间只有一个线程进行输出。
 
-```
+```cpp
 #include <mutex>
 
 void test1()
@@ -202,7 +202,7 @@ void test1()
 
 修改 `SpinLock` 的 `lock()` 方法：
 
-```
+```cpp
 void lock() {
     while (flag.test_and_set(std::memory_order_acquire)) {
         // 可选：避免完全忙等待
@@ -213,7 +213,7 @@ void lock() {
 
 ### 修改总结
 
-```
+```cpp
 #include <atomic>
 #include <iostream>
 #include <thread>

@@ -20,7 +20,7 @@ DAG（有向无环图）的任务调度目标是为相互依赖的任务确定�
 
 ## 三、C++代码实现
 ### 1. 递归DFS实现（基于深度优先搜索）
-```
+```cpp
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -69,7 +69,7 @@ public:
 };
 ```
 ### 2. 拓扑排序实现（Kahn算法）
-```
+```cpp
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -122,7 +122,7 @@ public:
 };
 ```
 ## 四、使用示例
-```
+```cpp
 int main() {
     // 示例DAG结构：
     // 0 → 2 → 3 → 4
@@ -207,7 +207,7 @@ priority_queue<int, vector<int>, greater<int>> q;
 ### 1.数据结构调整
 我们需要将原先基于数字索引的存储结构改为基于字符串的映射：
 
-```
+```cpp
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -270,7 +270,7 @@ public:
 };
 ```
 ### 2. 使用示例
-```
+```cpp
 int main() {
     StringDAGScheduler scheduler;
 
@@ -305,7 +305,7 @@ knownTasks 确保正确统计总任务数
 
 2. 起始任务判定：
 
-```
+```cpp
 // 检查所有已知任务中入度为0的
 for (const auto& pair : knownTasks) {
     if (inDegree[pair.first] == 0) {
@@ -315,7 +315,7 @@ for (const auto& pair : knownTasks) {
 ```
 3. 环检测逻辑：
 
-```
+```cpp
 if (result.size() != knownTasks.size()) {
     throw ...; // 存在未处理的任务，说明有环
 }
@@ -324,7 +324,7 @@ if (result.size() != knownTasks.size()) {
 场景1：存在多个独立任务链
 输入依赖：
 
-```
+```cpp
 scheduler.addDependency("A", "B");
 scheduler.addDependency("C", "D");
 ```
@@ -350,7 +350,7 @@ priority_queue<string, vector<string>, greater<string>> q;
 ## 5. 扩展功能建议
 1. 任务元数据绑定：
 
-```
+```cpp
 struct Task {
     string name;
     int priority;
@@ -361,7 +361,7 @@ unordered_map<string, Task> taskMetadata;
 ```
 2. 并行调度支持：
 
-```
+```cpp
 // 每次取出所有可并行执行的任务
 while (!q.empty()) {
     vector<string> parallelTasks;
@@ -377,7 +377,7 @@ while (!q.empty()) {
 ```
 3. 可视化输出：
 
-```
+```cpp
 void exportToDOT(const vector<string>& order) {
     cout << "digraph G {\n";
     for (const auto& [from, toList] : adj) {
